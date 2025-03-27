@@ -1,3 +1,8 @@
+#include <SoftwareSerial.h>
+#include <string.h>
+#include <Arduino.h>
+#include <SPI.h>
+
 #define TRIG_PIN A0 // Define Arduino pins for the ultrasonic sensor
 #define ECHO_PIN A1
 #define DISTANCE_THRESHOLD 10  // Distance threshold in cm
@@ -20,8 +25,8 @@ int in7 = 24;
 int in8 = 22;
 
 
-void setup() {
-    Serial.begin(9600);
+void integrateSetup() {
+    Serial.begin(115200);
     // Set up the ultrasonic sensor
     pinMode(TRIG_PIN, OUTPUT);
     pinMode(ECHO_PIN, INPUT);
@@ -151,7 +156,7 @@ void changedirection(){
     }
 }
 
-void loop() {
+void ultrasonicSensing() {
     // Send trigger pulse
     digitalWrite(TRIG_PIN, LOW);
     delayMicroseconds(2);
@@ -164,8 +169,8 @@ void loop() {
     int distance = duration * 0.034 / 2;  // Convert to cm
 
     if (distance > 0 && distance <= DISTANCE_THRESHOLD) {
-        Serial.print("The distance is: ");
-        Serial.print(distance);
+        Serial.println("The distance is: ");
+        Serial.println(distance);
         Serial.println("cm");
         Serial.println("Obstacle Detected!");
 
