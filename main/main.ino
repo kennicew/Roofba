@@ -159,6 +159,7 @@ void loop(void) // Constantly poll for new command or response data
   // down -> 6
   // right -> 8
   // left -> 7
-  
 
+  //ultrasonic sensing
+  ultrasonicSensing();
 }
