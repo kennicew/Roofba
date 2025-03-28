@@ -9,20 +9,23 @@
 #define servoPin 7 // Define Arduino pin for the servo motor
 int positions[] = {0, 90, 180, 270, 360};
 int index = 0;
+
 // Motor Driver 1 (Motors A & B)
-int enA = 45;
-int in1 = 47;
-int in2 = 49;
-int enB = 44;
-int in3 = 31;
-int in4 = 33;
+int enA = 3;  
+int in1 = 4;
+int in2 = 2;
+int enB = 3;
+int in3 = 4;
+int in4 = 2;
 // Motor Driver 2 (Motors C & D)
-int enC = 3;
-int in5 = 23;
-int in6 = 25;
-int enD = 2;
-int in7 = 24;
-int in8 = 22;
+int enC = 5;  
+int in5 = 6;
+int in6 = 7;
+int enD = 5;
+int in7 = 6;
+int in8 = 7;
+
+int motorSpeed = 100;
 
 
 void integrateSetup() {
@@ -39,7 +42,6 @@ void integrateSetup() {
     pinMode(in2, OUTPUT);
     pinMode(in3, OUTPUT);
     pinMode(in4, OUTPUT);
-
     pinMode(enC, OUTPUT);
     pinMode(enD, OUTPUT);
     pinMode(in5, OUTPUT);
@@ -75,11 +77,11 @@ void stopMotors() {
 }
 
 void beginmotors(){
-    // Set motors to a speed (a moderate number like 100 in this case)
-    analogWrite(enA, 100);
-    analogWrite(enB, 100);
-    analogWrite(enC, 100);
-    analogWrite(enD, 100);
+    // Set motors to a speed (a moderate number like motorSpeed in this case)
+    analogWrite(enA, motorSpeed);
+    analogWrite(enB, motorSpeed);
+    analogWrite(enC, motorSpeed);
+    analogWrite(enD, motorSpeed);
 
     // Move all motors forward
     digitalWrite(in1, HIGH);
@@ -90,6 +92,24 @@ void beginmotors(){
     digitalWrite(in6, HIGH);
     digitalWrite(in7, LOW);
     digitalWrite(in8, HIGH);
+}
+
+void backwards(){
+    // Set motors to a speed (a moderate number like motorSpeed in this case)
+    analogWrite(enA, motorSpeed);
+    analogWrite(enB, motorSpeed);
+    analogWrite(enC, motorSpeed);
+    analogWrite(enD, motorSpeed);
+
+    // Move all motors backwards
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, HIGH);
+    digitalWrite(in5, HIGH); 
+    digitalWrite(in6, LOW);
+    digitalWrite(in7, HIGH);
+    digitalWrite(in8, LOW);
 }
 
 void turnLeft() {
@@ -106,10 +126,10 @@ void turnLeft() {
   digitalWrite(in8, HIGH);
 
   // Set speed
-  analogWrite(enA, 100);
-  analogWrite(enB, 100);
-  analogWrite(enC, 100);
-  analogWrite(enD, 100);
+  analogWrite(enA, motorSpeed);
+  analogWrite(enB, motorSpeed);
+  analogWrite(enC, motorSpeed);
+  analogWrite(enD, motorSpeed);
 }
 
 void turnRight() {
@@ -126,10 +146,10 @@ void turnRight() {
   digitalWrite(in8, LOW);
 
   // Set speed
-  analogWrite(enA, 100);
-  analogWrite(enB, 100);
-  analogWrite(enC, 100);
-  analogWrite(enD, 100);
+  analogWrite(enA, motorSpeed);
+  analogWrite(enB, motorSpeed);
+  analogWrite(enC, motorSpeed);
+  analogWrite(enD, motorSpeed);
 }
 
 

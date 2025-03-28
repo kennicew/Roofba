@@ -48,6 +48,7 @@ void integrateSetup();
 void moveServo(int position);
 void stopMotors();
 void beginmotors();
+void backwards();
 void turnLeft();
 void turnRight();
 void changedirection();
@@ -144,7 +145,7 @@ void loop(void) // Constantly poll for new command or response data
     if (buttnum == 5) {
         beginmotors();  // Call forward function
     } else if (buttnum == 6) {
-        changedirection(); // Call backward function
+        backwards(); // Call backward function
     } else if (buttnum == 7) {
         turnLeft();  // Call left function
     } else if (buttnum == 8) {
