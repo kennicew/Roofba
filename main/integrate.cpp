@@ -1,3 +1,11 @@
+/*
+ * Integrate 
+ * 
+ * Contains functions written by Oscar and Jacqueline to control Roofba movement directions (front, back, left, right), 
+ * as well as preliminary integration for ultrasonic sensor and servo motor. 
+ * Functions defined here are called by Kennice's bluetooth code in main.
+ * 
+ */
 #include <SoftwareSerial.h>
 #include <string.h>
 #include <Arduino.h>
@@ -25,8 +33,7 @@ int enD = 5;
 int in7 = 6;
 int in8 = 7;
 
-int motorSpeed = 100;
-
+int motorSpeed = 255;
 
 void integrateSetup() {
     Serial.begin(115200);

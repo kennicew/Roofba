@@ -1,3 +1,12 @@
+/*
+ * Bluefruit.Config.h
+ * 
+ * Configuration file for Adafruit Bluefruit LE modules
+ * Defines pin assignments and settings for various communication modes
+ * 
+ * Only the software UART settings, which were relevant with Arduino UNO, were modified by Kennice
+ */
+
 // COMMON SETTINGS
 // ----------------------------------------------------------------------------------------------
 // These settings are used in both SW UART, HW UART and SPI mode
@@ -7,7 +16,7 @@
 #define BLE_READPACKET_TIMEOUT         500   // Timeout in ms waiting to read a response
 
 
-// SOFTWARE UART SETTINGS
+// SOFTWARE UART SETTINGS - changed by Kennice
 // ----------------------------------------------------------------------------------------------
 // The following macros declare the pins that will be used for 'SW' serial.
 // You should use this option if you are connecting the UART Friend to an UNO

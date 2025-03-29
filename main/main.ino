@@ -1,3 +1,11 @@
+/*
+ * Main 
+ * 
+ * Contains Kennice's bluetooth code integrated with motor functions by Oscar and Jacqueline
+ * Bluefruit library and sample code: https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/software
+ * Bluefruit controller app reference: https://learn.adafruit.com/bluefruit-le-connect/controller#control-pad-2923571
+ */
+
 // bluetooth definitions
 #include <string.h>
 #include <Arduino.h>
@@ -10,39 +18,29 @@
   #include <SoftwareSerial.h>
 #endif
 
+// Pin configurations for Arduino UNO software serial
+#define BLUEFRUIT_SWUART_RXD_PIN       9  
+#define BLUEFRUIT_SWUART_TXD_PIN       10  
+#define BLUEFRUIT_UART_CTS_PIN         11 
+#define BLUEFRUIT_UART_RTS_PIN         8   
+
+// Define bluetooth firmware properties
 #define FACTORYRESET_ENABLE         0
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
 #define MODE_LED_BEHAVIOUR          "MODE"
 
-// SOFTWARE UART SETTINGS
-#define BLUEFRUIT_SWUART_RXD_PIN       9    // Required for software serial!
-#define BLUEFRUIT_SWUART_TXD_PIN       10   // Required for software serial!
-#define BLUEFRUIT_UART_CTS_PIN         11   // Required for software serial!
-#define BLUEFRUIT_UART_RTS_PIN         8   // Optional, set to -1 if unused
 
-
-  
-/*=========================================================================*/
-
-// Create the bluefruit object, either software serial...uncomment these lines
-
-SoftwareSerial bluefruitSS = SoftwareSerial(BLUEFRUIT_SWUART_TXD_PIN, BLUEFRUIT_SWUART_RXD_PIN);
-
+// Create bluefruit Software Serial object
+SoftwareSerial bluefruitSS = SoftwareSerial(BLUEFRUIT_SWUART_TXD_PIN, BLUEFRUIT_SWUART_RXD_PIN); 
 Adafruit_BluefruitLE_UART ble(bluefruitSS, BLUEFRUIT_UART_MODE_PIN,
                       BLUEFRUIT_UART_CTS_PIN, BLUEFRUIT_UART_RTS_PIN);
 
-// A small helper
-void error(const __FlashStringHelper*err) {
-  Serial.println(err);
-  while (1);
-}
-
-// function prototypes over in packetparser.cpp
+// importing functions from packetparser.cpp
 uint8_t readPacket(Adafruit_BLE *ble, uint16_t timeout);
 float parsefloat(uint8_t *buffer);
 void printHex(const uint8_t * data, const uint32_t numBytes);
 
-// functions from integrate.cpp
+// importing functions from integrate.cpp
 void turnLeft();
 void integrateSetup();
 void moveServo(int position);
@@ -54,62 +52,50 @@ void turnRight();
 void changedirection();
 void ultrasonicSensing();
 
-// the packet buffer
-extern uint8_t packetbuffer[];
+extern uint8_t packetbuffer[]; // defining data array received from Bluefruit module
+
+// A small helper function to prints error message to Serial and halt execution
+void error(const __FlashStringHelper*err) {
+  Serial.println(err);
+  while (1);
+}
 
 void setup(void)
 {
-  //For motors
+  //Initialize motors setup
   integrateSetup();
 
-  //For bluetooth  
-  while (!Serial);  // required for Flora & Micro
+  //Bluetooth setup
+  while (!Serial);  // Wait for serial
   delay(500);
 
-  Serial.begin(115200);
-  Serial.println(F("Adafruit Bluefruit App Controller Example"));
-  Serial.println(F("-----------------------------------------"));
+  Serial.begin(115200); // Set serial to poart 115200 specifically for bluetooth-serial communication
 
-  /* Initialise the module */
+  // Initialize Bluefruit module
   Serial.print(F("Initialising the Bluefruit LE module: "));
 
+  // Error for debugging when Serial cannot connect to Bluefruit module
   if ( !ble.begin(VERBOSE_MODE) )
   {
     error(F("Couldn't find Bluefruit, make sure it's in CoMmanD mode & check wiring?"));
   }
-  Serial.println( F("OK!") );
 
-  if ( FACTORYRESET_ENABLE )
-  {
-    /* Perform a factory reset to make sure everything is in a known state */
-    Serial.println(F("Performing a factory reset: "));
-    if ( ! ble.factoryReset() ){
-      error(F("Couldn't factory reset"));
-    }
+  // If bluetooth connection is established with serial, print OK
+  Serial.println( F("OK!") );
+  
   }
 
+  ble.echo(false); // Disable command echo from Bluefruit
+  ble.verbose(false);  // Reduce debug output
 
-  /* Disable command echo from Bluefruit */
-  ble.echo(false);
-
-  Serial.println("Requesting Bluefruit info:");
-  /* Print Bluefruit information */
-  ble.info();
-
-  Serial.println(F("Please use Adafruit Bluefruit LE app to connect in Controller mode"));
-  Serial.println(F("Then activate/use the sensors, color picker, game controller, etc!"));
-  Serial.println();
-
-  ble.verbose(false);  // debug info is a little annoying after this point!
-
-  /* Wait for connection */
+  // Wait for connection when Bluefruit is not connected
   while (! ble.isConnected()) {
       delay(500);
   }
 
   Serial.println(F("******************************"));
 
-  // LED Activity command is only supported from 0.6.6
+  // Configure LED behavior if firmware supports it
   if ( ble.isVersionAtLeast(MINIMUM_FIRMWARE_VERSION) )
   {
     // Change Mode LED Activity
@@ -127,40 +113,45 @@ void setup(void)
 
 void loop(void) // Constantly poll for new command or response data
 {
-  /* Wait for new data to arrive */
+  // Check for new Bluetooth data
   uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
   if (len == 0) return;
 
-  // Buttons
+  // Emergency stop if disconnected
+  if (! ble.isConnected()) {
+      stopMotors(); 
+  }
+
+  // Handle button pressed commands
   if (packetbuffer[1] == 'B') {
     uint8_t buttnum = packetbuffer[2] - '0';
     boolean pressed = packetbuffer[3] - '0';
-    Serial.print ("Button "); Serial.print(buttnum);
+    Serial.print ("Button "); Serial.print(buttnum); //Print the button number in serial
+    
     if (pressed) {
       Serial.println(" pressed");
+      if (buttnum == 5) {
+        beginmotors();  // Call forward function
+      } else if (buttnum == 6) {
+          backwards(); // Call backward function
+      } else if (buttnum == 7) {
+          turnLeft();  // Call left function
+      } else if (buttnum == 8) {
+          turnRight();  // Call right function
+      } 
     } else {
       Serial.println(" released");
-    }
-
-    if (buttnum == 5) {
-        beginmotors();  // Call forward function
-    } else if (buttnum == 6) {
-        backwards(); // Call backward function
-    } else if (buttnum == 7) {
-        turnLeft();  // Call left function
-    } else if (buttnum == 8) {
-        turnRight();  // Call right function
-    } else {
       stopMotors(); // Stop the rover if no buttons are pressed
     }
   }
 
-  //Figure out which button is what, use an if statement to call the motor functions
+  delay(5);
+
+  // Button mapping reference:
   // up -> 5
   // down -> 6
   // right -> 8
   // left -> 7
-
-  //ultrasonic sensing
-  ultrasonicSensing();
+  
+  //ultrasonicSensing(); // Optional ultrasonic sensing (commented out for motor testing to reduce delays)
 }

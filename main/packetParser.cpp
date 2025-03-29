@@ -1,3 +1,11 @@
+/*
+ * Bluefruit Packet Parser
+ * 
+ * Handles communication with Adafruit Bluefruit LE modules, including necessary includes 
+ * and defines packet lengths for various data types. Provides utility functions to parse 
+ * incoming float values, print hex data, and read/validate packets with checksum verification.
+ */
+
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
