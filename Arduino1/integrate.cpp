@@ -33,7 +33,7 @@ int enD = 5;
 int in7 = 6;
 int in8 = 7;
 
-int motorSpeed = 255;
+int motorSpeed = 150;
 
 void integrateSetup() {
     Serial.begin(115200);
